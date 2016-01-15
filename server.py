@@ -1,5 +1,5 @@
 #  coding: utf-8 
-import SocketServer
+import SocketServer, os.path, mimetypes
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -26,13 +26,54 @@ import SocketServer
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall("OK")
+        #self.request.sendall("OK")
+        #self.request.sendall(self.data)
+        self.dataList = self.data.split()
+        self.type = self.dataList[0]
+        if (self.type == "GET"):
+            self.dataString = self.dataList[1]
+            self.httpType = self.dataList[2]
+            print("data: %s\n" % self.dataString)
+            self.serve()
+
+    def serve(self):
+        self.dir = "./www"
+        self.filepath = self.dir+self.dataString
+        print("filepath: "+self.filepath)
+        #http://stackoverflow.com/questions/8933237/how-to-find-if-directory-exists-in-python by phihag
+        print ("exists?",os.path.exists(self.filepath))
+        if (os.path.exists(self.filepath)):
+            if (self.filepath.endswith(".css")):
+                f = open(self.filepath,"r")
+                self.request.sendall('HTTP/1.1 200\r\n Content-Type: text/css\n\n')
+                #self.request.sendall('HTTP/1.1 200 '+f.read()+'\n\n')
+                self.request.sendall(f.read())
+                f.close()
+            else:
+                if (not self.filepath.endswith("/") or not self.filepath.endswith(".html")):
+                    self.request.sendall('HTTP/1.1 301 Moved Permanently\r\n')
+                    self.datastring = self.dataString+'/'
+                    print ("filepath fixed: "+self.datastring)
+                    self.request.sendall('Location: '+self.datastring+'\r\n')
+                #print ("got a request of: %s\n" % self.filepath)
+                if (not self.filepath.endswith(".html")):
+                    self.filepath = self.filepath+"/index.html"
+                f = open(self.filepath,"r")
+                self.request.sendall('HTTP/1.1 200\r\n Content-Type: text/html\n\n')
+                #self.request.sendall('HTTP/1.1 200 '+f.read()+'\n\n')
+                self.request.sendall(f.read())
+                f.close()
+        else:
+            #send 404
+            print('404')
+            self.request.sendall('HTTP/1.1 404 Not Found\r\n')
+            self.request.sendall('Content-Type: text/html\n\n')
+            self.request.sendall('404 Page Not Found')
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
