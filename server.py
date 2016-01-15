@@ -55,11 +55,11 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 self.request.sendall(f.read())
                 f.close()
             else:
-                if (not self.filepath.endswith("/") or not self.filepath.endswith(".html")):
+                if (not self.filepath.endswith("/") and not self.dataString.endswith(".html")):
                     self.request.sendall('HTTP/1.1 301 Moved Permanently\r\n')
-                    self.datastring = self.dataString+'/'
-                    print ("filepath fixed: "+self.datastring)
-                    self.request.sendall('Location: '+self.datastring+'\r\n')
+                    self.dataString = self.dataString+'/'
+                    print ("filepath fixed: "+self.dataString)
+                    self.request.sendall('Location: '+self.dataString+'\r\n')
                 #print ("got a request of: %s\n" % self.filepath)
                 if (not self.filepath.endswith(".html")):
                     self.filepath = self.filepath+"/index.html"
