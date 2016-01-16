@@ -50,7 +50,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         if (os.path.exists(self.filepath)):
             if (self.filepath.endswith(".css")):
                 f = open(self.filepath,"r")
-                self.request.sendall('HTTP/1.1 200\r\n Content-Type: text/css\n\n')
+                self.request.sendall("HTTP/1.1 200 OK \r\nContent-Type: text/css\n\n")
                 #self.request.sendall('HTTP/1.1 200 '+f.read()+'\n\n')
                 self.request.sendall(f.read())
                 f.close()
@@ -64,7 +64,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 if (not self.filepath.endswith(".html")):
                     self.filepath = self.filepath+"/index.html"
                 f = open(self.filepath,"r")
-                self.request.sendall('HTTP/1.1 200\r\n Content-Type: text/html\n\n')
+                self.request.sendall('HTTP/1.1 200 OK \r\nContent-Type: text/html\r\n\r\n')
                 #self.request.sendall('HTTP/1.1 200 '+f.read()+'\n\n')
                 self.request.sendall(f.read())
                 f.close()
