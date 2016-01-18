@@ -1,5 +1,5 @@
 #  coding: utf-8 
-import SocketServer, os.path, mimetypes
+import SocketServer, os.path
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -30,15 +30,13 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        #self.request.sendall("OK")
-        #self.request.sendall(self.data)
+        #print ("Got a request of: %s\n" % self.data)
         self.dataList = self.data.split()
         self.type = self.dataList[0]
         if (self.type == "GET"):
             self.dataString = self.dataList[1]
             self.httpType = self.dataList[2]
-            print("data: %s\n" % self.dataString)
+            #print("data: %s\n" % self.dataString)
             self.serve()
 
     def serve(self):
@@ -47,27 +45,33 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         print("filepath: "+self.filepath)
         #http://stackoverflow.com/questions/8933237/how-to-find-if-directory-exists-in-python by phihag
         print ("exists?",os.path.exists(self.filepath))
-        if (os.path.exists(self.filepath)):
-            if (self.filepath.endswith(".css")):
+        print ("access?",os.access(self.filepath, os.R_OK))
+        if (os.access(self.filepath, os.R_OK)):
+            #check if has '/'
+            if (self.dataString.endswith("/")):
+                self.filepath = self.filepath+"index.html"
+                print ("filepath: ", self.filepath)
+            if (self.filepath.endswith(".html")):
+                print ("in .html")
                 f = open(self.filepath,"r")
-                self.request.sendall("HTTP/1.1 200 OK \r\nContent-Type: text/css\n\n")
-                #self.request.sendall('HTTP/1.1 200 '+f.read()+'\n\n')
+                self.request.sendall('HTTP/1.1 200 OK \r\nContent-Type: text/html\r\n\r\n')
                 self.request.sendall(f.read())
                 f.close()
-            else:
-                if (not self.filepath.endswith("/") and not self.dataString.endswith(".html")):
+            #css
+            if (self.filepath.endswith(".css")):
+                print("in .css")
+                f = open(self.filepath,"r")
+                self.request.sendall("HTTP/1.1 200 OK \r\nContent-Type: text/css\r\n\r\n")
+                self.request.sendall(f.read())
+                f.close()
+            #redirect if eg. /deep
+            if (not self.filepath.endswith("/")):
+                if (not (self.filepath.endswith(".html") or self.filepath.endswith(".css"))):
+                    print ("redirect")
                     self.request.sendall('HTTP/1.1 301 Moved Permanently\r\n')
                     self.dataString = self.dataString+'/'
                     print ("filepath fixed: "+self.dataString)
                     self.request.sendall('Location: '+self.dataString+'\r\n')
-                #print ("got a request of: %s\n" % self.filepath)
-                if (not self.filepath.endswith(".html")):
-                    self.filepath = self.filepath+"/index.html"
-                f = open(self.filepath,"r")
-                self.request.sendall('HTTP/1.1 200 OK \r\nContent-Type: text/html\r\n\r\n')
-                #self.request.sendall('HTTP/1.1 200 '+f.read()+'\n\n')
-                self.request.sendall(f.read())
-                f.close()
         else:
             #send 404
             print('404')
