@@ -36,7 +36,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         if (self.type == "GET"):
             self.dataString = self.dataList[1]
             self.httpType = self.dataList[2]
-            #print("data: %s\n" % self.dataString)
+            print("data: %s\n" % self.dataString)
             self.serve()
 
     def serve(self):
@@ -58,14 +58,14 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 self.request.sendall(f.read())
                 f.close()
             #css
-            if (self.filepath.endswith(".css")):
+            elif (self.filepath.endswith(".css")):
                 print("in .css")
                 f = open(self.filepath,"r")
                 self.request.sendall("HTTP/1.1 200 OK \r\nContent-Type: text/css\r\n\r\n")
                 self.request.sendall(f.read())
                 f.close()
             #redirect if eg. /deep
-            if (not self.filepath.endswith("/")):
+            elif (not self.filepath.endswith("/")):
                 if (not (self.filepath.endswith(".html") or self.filepath.endswith(".css"))):
                     print ("redirect")
                     self.request.sendall('HTTP/1.1 301 Moved Permanently\r\n')
