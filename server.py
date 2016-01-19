@@ -36,45 +36,38 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         if (self.type == "GET"):
             self.dataString = self.dataList[1]
             self.httpType = self.dataList[2]
-            print("data: %s\n" % self.dataString)
+            #print("data: %s\n" % self.dataString)
             self.serve()
 
     def serve(self):
         self.dir = "./www"
         self.filepath = self.dir+self.dataString
-        print("filepath: "+self.filepath)
-        #http://stackoverflow.com/questions/8933237/how-to-find-if-directory-exists-in-python by phihag
-        print ("exists?",os.path.exists(self.filepath))
-        print ("access?",os.access(self.filepath, os.R_OK))
+        #http://stackoverflow.com/questions/2113427/determining-whether-a-directory-is-writeable
+        #Max Shawabkeh Jan 21, 2010 accessed January 18 2016
         if (os.access(self.filepath, os.R_OK)):
             #check if has '/'
             if (self.dataString.endswith("/")):
                 self.filepath = self.filepath+"index.html"
-                print ("filepath: ", self.filepath)
+			#html
             if (self.filepath.endswith(".html")):
-                print ("in .html")
                 f = open(self.filepath,"r")
                 self.request.sendall('HTTP/1.1 200 OK \r\nContent-Type: text/html\r\n\r\n')
                 self.request.sendall(f.read())
                 f.close()
             #css
             elif (self.filepath.endswith(".css")):
-                print("in .css")
                 f = open(self.filepath,"r")
                 self.request.sendall("HTTP/1.1 200 OK \r\nContent-Type: text/css\r\n\r\n")
                 self.request.sendall(f.read())
                 f.close()
             #redirect if eg. /deep
             elif (not self.filepath.endswith("/")):
-                if (not (self.filepath.endswith(".html") or self.filepath.endswith(".css"))):
-                    print ("redirect")
+                if (not self.filepath.endswith(".html") and not self.filepath.endswith(".css")):
                     self.request.sendall('HTTP/1.1 301 Moved Permanently\r\n')
                     self.dataString = self.dataString+'/'
-                    print ("filepath fixed: "+self.dataString)
                     self.request.sendall('Location: '+self.dataString+'\r\n')
         else:
-            #send 404
-            print('404')
+            #filepath doesn't exist so send 404
             self.request.sendall('HTTP/1.1 404 Not Found\r\n')
             self.request.sendall('Content-Type: text/html\n\n')
             self.request.sendall('404 Page Not Found')
