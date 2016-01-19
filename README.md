@@ -7,6 +7,9 @@ See requirements.org (plain-text) for a description of the project.
 
 Make a simple webserver.
 
+I used Max Shawabkeh's answer from January 21, 2010 at http://stackoverflow.com/questions/2113427/determining-whether-a-directory-is-writeable
+to learn how to see if a filepath exists and is accessible. Accessed January 18 2016.
+
 Contributors / Licensing
 ========================
 
