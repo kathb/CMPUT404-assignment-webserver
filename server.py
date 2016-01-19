@@ -35,7 +35,6 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         self.type = self.dataList[0]
         if (self.type == "GET"):
             self.dataString = self.dataList[1]
-            self.httpType = self.dataList[2]
             #print("data: %s\n" % self.dataString)
             self.serve()
 
